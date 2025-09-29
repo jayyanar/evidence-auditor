@@ -1,152 +1,184 @@
-# 🔍 Consent Evidence Auditor
+# 🧪 Invoice Processing Lab Exercise
+## Technology Stack Demonstration: LangGraph + LangChain + OpenAI + Pinecone
 
-An end-to-end AI system for automatically classifying customer consent documents using LangGraph, OpenAI, and Pinecone.
+An end-to-end AI system demonstrating modern document processing technologies for automated invoice classification and validation.
 
-## 🎯 Features
+## 🎯 Lab Objectives
 
-- **Automated Classification**: Classifies documents into Opt-In, Opt-Out, Invalid, or Unclear
-- **OCR Support**: Extracts text from scanned images using EasyOCR
-- **RAG-based Context**: Retrieves relevant policy and historical context
-- **Human Review**: Streamlit UI for reviewing low-confidence cases
-- **REST API**: FastAPI server for integration
-- **Audit Trail**: Complete JSONL logging for compliance
+This lab demonstrates the integration of cutting-edge AI technologies:
+- **LangGraph**: Workflow orchestration and state management
+- **LangChain**: Document parsing and text processing
+- **OpenAI**: Vision-based extraction and embeddings
+- **Pinecone**: Vector storage and retrieval
+
+## 📋 Business Rules & Validation
+
+**Invoice Validation Logic:**
+- ✅ **Valid**: All required fields present (vendor name, invoice number, date, amount)
+- ❌ **Invalid**: Missing any required field
+
+**Validation Process:**
+1. Extract structured data from PDF using GPT-4 Vision
+2. Validate against business rules
+3. Classify as Valid/Invalid with detailed rationale
+4. Store results with validation metadata
 
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
 ```bash
-pip install -r requirements.txt
+pip install langgraph langchain langchain-openai langchain-pinecone pinecone PyMuPDF pandas
 ```
 
 ### 2. Setup Environment
 ```bash
 cp .env.example .env
-# Edit .env with your API keys
+# Add your API keys:
+# OPENAI_API_KEY=your_openai_key
+# PINECONE_API_KEY=your_pinecone_key
 ```
 
-### 3. Initialize Pinecone Index
+### 3. Run the Lab Exercise
+
+**Jupyter Notebook (Recommended)**:
 ```bash
-python main.py --setup
+jupyter notebook invoice_processing_lab.ipynb
 ```
 
-### 4. Run the System
+The notebook will:
+1. Convert PDFs to markdown and display content
+2. Validate invoices based on business rules
+3. Store markdown content in Pinecone vector database
+4. Execute test queries with validation context
 
-**Streamlit UI (Recommended)**:
-```bash
-python main.py --ui
-```
-
-**FastAPI Server**:
-```bash
-python main.py --server
-```
-
-**CLI Classification**:
-```bash
-python main.py --classify document.pdf
-```
-
-**Test Sample Documents**:
-```bash
-python main.py --test
-```
-
-## 📋 Classification Categories
-
-- **Opt-In**: Explicit consent to receive marketing
-- **Opt-Out**: Request to stop communications  
-- **Invalid**: Unrelated to marketing consent
-- **Unclear**: Ambiguous or contradictory content
-
-## 🔧 API Usage
-
-### POST /classify
-Upload a document for classification:
-
-```bash
-curl -X POST "http://localhost:8000/classify" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@document.pdf"
-```
-
-Response:
-```json
-{
-  "case_id": "uuid-here",
-  "filename": "document.pdf", 
-  "classification": {
-    "label": "Opt-Out",
-    "confidence": 0.88,
-    "rationale": "Customer explicitly requested removal",
-    "citations": [...]
-  }
-}
-```
-
-## 📊 Audit Logging
-
-All classifications are logged to `audit_log.jsonl`:
-
-```json
-{
-  "case_id": "case_123",
-  "timestamp": 1727640000,
-  "label": "Opt-Out", 
-  "confidence": 0.88,
-  "rationale": "...",
-  "doc_text": "..."
-}
-```
-
-## 🏗️ Architecture
+## 📊 Workflow Pipeline
 
 ```
-Document → OCR → Chunking → RAG Retrieval → LLM Classification → Audit Log
+PDF Files → LLM Vision → Markdown Display → Invoice Validation → Vector Storage → RAG Queries
 ```
 
-- **LangGraph**: Orchestrates the workflow
-- **OpenAI**: Embeddings and GPT-4 classification
-- **Pinecone**: Vector storage for RAG
-- **EasyOCR**: Text extraction from images
+### Step-by-Step Process:
+1. **Load PDFs**: Discover invoice files in data directory
+2. **Convert to Markdown**: Use GPT-4 Vision to extract and format content
+3. **Display Content**: Show all markdown content on screen for review
+4. **Validate Invoices**: Apply business rules and classify as Valid/Invalid
+5. **Store in Vector DB**: Save markdown content with validation metadata
+6. **Test Queries**: Execute RAG queries with validation context
 
-## 🔒 Environment Variables
+## 🔧 Technology Integration
 
-```bash
-OPENAI_API_KEY=your_openai_key
-PINECONE_API_KEY=your_pinecone_key  
-PINECONE_INDEX_NAME=consent-auditor
-```
+### LangGraph Orchestration
+- **State Management**: TypedDict for workflow state
+- **Node-based Processing**: Modular workflow components
+- **Error Handling**: Comprehensive error tracking and reporting
+
+### LangChain Document Processing
+- **PDF Processing**: PyMuPDF for high-quality image conversion
+- **Text Splitting**: Intelligent document chunking
+- **Vector Operations**: Seamless Pinecone integration
+
+### OpenAI Integration
+- **Vision Processing**: GPT-4 Vision for image-based PDF reading
+- **Structured Extraction**: JSON-formatted data extraction
+- **Embeddings**: text-embedding-3-small for vector storage
+
+### Pinecone Vector Database
+- **Serverless Architecture**: AWS-based vector storage
+- **Metadata Filtering**: Rich metadata for contextual search
+- **Similarity Search**: Semantic document retrieval
 
 ## 📁 Project Structure
 
 ```
-├── consent_auditor.py    # Core LangGraph workflow
-├── server.py            # FastAPI REST API
-├── streamlit_app.py     # Streamlit UI
-├── setup_pinecone.py    # Index initialization
-├── main.py             # CLI runner
-├── requirements.txt    # Dependencies
-└── audit_log.jsonl    # Classification logs
+├── invoice_processing_lab.ipynb    # Main lab exercise notebook
+├── data/                          # Sample invoice PDFs
+│   ├── invoice_1.pdf
+│   ├── invoice_2.pdf
+│   └── ...
+├── markdown_output/               # Generated markdown files
+├── requirements.txt              # Python dependencies
+├── .env.example                 # Environment template
+└── README.md                   # This file
 ```
 
-## 🎛️ Customization
+## 📊 Expected Outcomes
 
-- **Modify prompts** in `consent_auditor.py` → `decide_node()`
-- **Add new document types** by extending OCR logic
-- **Customize UI** in `streamlit_app.py`
-- **Adjust confidence thresholds** for human review routing
+### 1. PDF to Markdown Conversion
+- Clean, structured markdown from image-based PDFs
+- Preserved formatting and important details
+- Visual display of all processed content
 
-## 📈 Monitoring
+### 2. Invoice Validation Results
+```
+📊 INVOICE VALIDATION RESULTS
+Filename        Status    Vendor Name    Invoice Number    Date        Amount
+invoice_1.pdf   Valid     Acme Corp      INV-001          2024-01-15  $1,250.00
+invoice_2.pdf   Invalid   Missing        INV-002          2024-01-16  Missing
+```
 
-The Streamlit UI provides:
-- Real-time classification metrics
-- Human review queue for low-confidence cases
-- Complete audit trail visualization
-- Manual override capabilities
+### 3. Vector Search with Validation Context
+- Semantic search across all invoice content
+- Results include validation status and extracted fields
+- Contextual retrieval based on business rules
+
+## 🔍 Test Queries
+
+The lab includes comprehensive test queries:
+- "Show me valid invoices with vendor information"
+- "Find invoices with missing required fields"
+- "What are the invoice amounts and dates?"
+- "Which invoices have complete vendor details?"
+- "Show me invalid invoices and reasons"
+
+## 📈 Performance Metrics
+
+- **Processing Speed**: Instant PDF to markdown conversion
+- **Validation Accuracy**: Rule-based classification with detailed rationale
+- **Search Relevance**: Semantic similarity with validation context
+- **Scalability**: Vector database handles large document collections
+
+## 🛠️ Customization
+
+### Modify Business Rules
+Edit the `validate_invoice()` function in the notebook to change validation criteria.
+
+### Add New Query Types
+Extend the `test_queries` list to include domain-specific searches.
+
+### Adjust Vector Storage
+Modify metadata fields in `store_in_vector_db()` for custom document attributes.
+
+## 🔒 Environment Variables
+
+```bash
+OPENAI_API_KEY=your_openai_key      # Required for GPT-4 Vision and embeddings
+PINECONE_API_KEY=your_pinecone_key  # Required for vector storage
+```
+
+## 📚 Learning Outcomes
+
+After completing this lab, you will understand:
+- **LangGraph workflow orchestration** for complex AI pipelines
+- **Vision-based document processing** using GPT-4 Vision
+- **Vector database integration** for semantic search
+- **Business rule validation** in AI systems
+- **RAG implementation** with contextual metadata
+
+## 🎓 Advanced Features
+
+- **State-driven Processing**: LangGraph manages complex workflow state
+- **Rich Metadata Storage**: Validation results stored with vector embeddings
+- **Interactive Display**: Jupyter notebook shows all processed content
+- **Comprehensive Testing**: Multiple query types with structured results
+- **Professional Output**: Pandas DataFrames for business reporting
 
 ## 🔧 Troubleshooting
 
-**OCR Issues**: Ensure images are clear and text is readable
+**PDF Processing Issues**: Ensure PDFs are readable and not password-protected
 **API Errors**: Check API keys and rate limits
 **Pinecone Connection**: Verify index name and API key
-**Low Accuracy**: Add more policy documents to improve context
+**Validation Accuracy**: Review business rules and adjust extraction prompts
+
+---
+
+This lab exercise demonstrates production-ready AI document processing with modern tools and best practices.
